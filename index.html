@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>aLiu's Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+/* 全局变量定义 */
+:root {
+    --text-color: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.12);
+    --card-hover: rgba(255, 255, 255, 0.25);
+    --fallback-bg: url('https://bing.img.run/1920x1080.php');
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    color: var(--text-color);
+    background: var(--fallback-bg) no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    padding-bottom: 20px; /* 底部留白 */
+}
+
+#bg-video {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -10;
+    object-fit: cover;
+    filter: brightness(0.7);
+}
+
+/* --- 1. 顶部信息区域 --- */
+.header-info {
+    margin-top: 12vh;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    opacity: 0.9;
+    animation: fadeIn 1s ease backwards;
+}
+
+.weather-badge {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- 2. 时钟区域 --- */
+.clock-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    text-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    animation: dropDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    font-size: 96px; 
+    font-weight: 700;
+    letter-spacing: -3px;
+    font-variant-numeric: tabular-nums;
+}
+
+.clock-colon {
+    margin: 0 2px;
+    position: relative;
+    top: -5px;
+    opacity: 0.9;
+}
+
+.clock-seconds {
+    display: inline-block;
+    width: 1.25em;
+    text-align: left;
+}
+
+.tick-anim { animation: slideUpFade 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+.date {
+    font-size: 18px;
+    opacity: 0.8;
+    margin-bottom: 40px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+}
+
+/* --- 3. 搜索框 --- */
+.search-container {
+    width: 100%;
+    max-width: 680px;
+    padding: 0 20px;
+    margin-bottom: 60px;
+    z-index: 1;
+    animation: fadeIn 1s ease 0.3s backwards;
+}
+
+.search-input {
+    width: 100%;
+    padding: 18px 30px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #fff;
+    font-size: 18px;
+    outline: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+}
+
+.search-input:focus {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255,255,255,0.5);
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+/* --- 4. 图标网格 --- */
+.main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 30px 20px;
+    width: 100%;
+    max-width: 1000px;
+    padding: 0 20px 60px 20px;
+    z-index: 1;
+    animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s backwards;
+}
+
+.app-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.app-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.3, 1.5, 0.5, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.app-card:hover .app-icon {
+    transform: translateY(-8px) scale(1.05);
+    background: var(--card-hover);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.4);
+}
+
+.app-icon img, .app-icon svg {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+}
+
+.app-name {
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    opacity: 0.9;
+}
+
+.lock .app-icon::after { content: "🔒"; position: absolute; top: 5px; right: 5px; font-size: 12px; opacity: 0.7; }
+
+.section-header {
+    grid-column: 1 / -1;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    opacity: 0.9;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    border-left: 4px solid #fff;
+    line-height: 1.2;
+}
+
+/* --- 5. 底部 GitHub 信息 --- */
+.footer-container {
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+    z-index: 1;
+    animation: fadeIn 1s ease 0.8s backwards;
+}
+
+.github-capsule {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 10px 24px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.github-capsule:hover {
+    background: var(--card-hover);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.github-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* 动画定义 */
+@keyframes dropDown { from { opacity:0; transform:translateY(-40px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideUp { from { opacity:0; transform:translateY(50px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes slideUpFade { 
+    0% { opacity: 0.5; transform: translateY(15px); } 
+    100% { opacity: 1; transform: translateY(0); } 
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+    .header-info { margin-top: 8vh; font-size: 16px; flex-direction: column; gap: 5px; }
+    .clock-container { font-size: 52px; letter-spacing: -1px; } 
+    .clock-colon { margin: 0 1px; }
+    .main-grid { grid-template-columns: repeat(4, 1fr); gap: 20px 10px; padding-bottom: 40px; }
+    .app-icon { width: 64px; height: 64px; }
+    .app-icon img { width: 32px; height: 32px; }
+    .footer-container { padding-bottom: 30px; }
+}
+</style>
+</head>
+<body>
+
+    <video autoplay muted loop playsinline id="bg-video" poster="https://bing.img.run/1920x1080.php">
+        <source src="https://cdn.pixabay.com/video/2021/08/04/83897-583204368_large.mp4" type="video/mp4">
+    </video>
+
+    <div class="header-info">
+        <div id="greeting">Hello</div>
+        <div class="weather-badge" id="weather-badge" style="display:none;">
+            <span id="weather-icon"></span>
+            <span id="weather-text">Locating...</span>
+        </div>
+    </div>
+
+    <div class="clock-container">
+        <span id="clock-hours-min">00:00</span>
+        <span class="clock-colon">:</span>
+        <span id="clock-seconds" class="clock-seconds">00</span>
+    </div>
+
+    <div class="date" id="date">Loading...</div>
+
+    <div class="search-container">
+        <form action="https://www.google.com/search" method="get" target="_blank">
+            <input class="search-input" type="text" name="q" placeholder="Search Google..." autocomplete="off">
+        </form>
+    </div>
+
+    <div class="main-grid">
+        <div class="section-header">Favorites</div>
+        <a class="app-card" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
+            <div class="app-icon"><img class="favicon" data-domain="youtube.com"></div>
+            <span class="app-name">YouTube</span>
+        </a>
+        <a class="app-card" href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
+            <div class="app-icon"><img class="favicon" data-domain="openai.com"></div>
+            <span class="app-name">ChatGPT</span>
+        </a>
+        <a class="app-card" href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">
+            <div class="app-icon"><img class="favicon" data-domain="google.com"></div>
+            <span class="app-name">Gemini</span>
+        </a>
+        <a class="app-card" href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer">
+            <div class="app-icon"><img class="favicon" data-domain="cloudflare.com"></div>
+            <span class="app-name">Cloudflare</span>
+        </a>
+		 <a class="app-card" href="https://nz.geniubi.pp.ua/" target="_blank" rel="noopener noreferrer">
+    <div class="app-icon">
+        <img src="https://www.svgrepo.com/show/422365/activity-arrow.svg" alt="Nezha">
+         </div>
+          <span class="app-name">Nezha</span>
+       </a>
+        </a>
+		<a class="app-card" href="https://player.esnad.dpdns.org/player/" target="_blank" rel="noopener noreferrer">
+    <div class="app-icon">
+        <img src="https://www.svgrepo.com/show/424369/music-play-play-button.svg" alt="TWPlayer">
+         </div>
+          <span class="app-name">TWPlayer</span>
+       </a>
+
+		
+
+        <div class="section-header">Server & Dev</div>
+        <a class="app-card" href="https://github.com" target="_blank" rel="noopener noreferrer">
+            <div class="app-icon"><img class="favicon" data-domain="github.com"></div>
+            <span class="app-name">GitHub</span>
+        </a>
+        <a class="app-card" href="https://www.speedtest.net" target="_blank" rel="noopener noreferrer">
+            <div class="app-icon"><img class="favicon" data-domain="speedtest.net"></div>
+            <span class="app-name">Speedtest</span>
+        </a>
+    </div>
+
+    <div class="footer-container">
+        <a href="https://github.com/bibibile/file" target="_blank" rel="noopener noreferrer" class="github-capsule">
+            <svg class="github-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.419-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+            <span>@aLiu</span>
+        </a>
+    </div>
+
+<script>
+    /* 1. 图标加载逻辑 */
+    document.querySelectorAll('.favicon').forEach(img => {
+        const domain = img.getAttribute('data-domain');
+        img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        img.onerror = function() {
+            this.parentNode.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
+        };
+    });
+
+    /* 2. 时钟与问候 */
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        document.getElementById('clock-hours-min').textContent = `${hours}:${minutes}`;
+        
+        const secEl = document.getElementById('clock-seconds');
+        if(secEl.textContent !== seconds) {
+            secEl.textContent = seconds;
+            secEl.classList.remove('tick-anim');
+            void secEl.offsetWidth; 
+            secEl.classList.add('tick-anim');
+        }
+
+        const hour = now.getHours();
+        let greetingText = "Hello";
+        if (hour >= 5 && hour < 12) greetingText = "Good Morning";
+        else if (hour >= 12 && hour < 18) greetingText = "Good Afternoon";
+        else greetingText = "Good Evening";
+        document.getElementById('greeting').textContent = greetingText;
+
+        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        document.getElementById('date').textContent = now.toLocaleDateString('zh-CN', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* 3. 天气获取 */
+    async function fetchWeather() {
+        const weatherBadge = document.getElementById('weather-badge');
+        const weatherText = document.getElementById('weather-text');
+        const weatherIcon = document.getElementById('weather-icon');
+        try {
+            const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
+            const geoData = await geoRes.json();
+            const { city, latitude, longitude } = geoData;
+            const weatherRes = await fetch(
+                `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+            );
+            const weatherData = await weatherRes.json();
+            const current = weatherData.current_weather;
+            let icon = '🌤️'; 
+            const code = current.weathercode;
+            if (code === 0) icon = '☀️';
+            else if (code >= 1 && code <= 3) icon = '☁️';
+            else if (code >= 45 && code <= 48) icon = '🌫️';
+            else if (code >= 51 && code <= 67) icon = '🌧️';
+            else if (code >= 71 && code <= 77) icon = '❄️';
+            else if (code >= 95) icon = '⛈️';
+            weatherIcon.textContent = icon;
+            weatherText.textContent = `${city} ${Math.round(current.temperature)}°C`;
+            weatherBadge.style.display = 'flex';
+        } catch (error) {
+            console.error("Weather fetch failed:", error);
+            weatherBadge.style.display = 'none';
+        }
+    }
+    fetchWeather();
+
+    document.addEventListener("keydown", e => {
+        if(e.key === "/" && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            document.querySelector('.search-input').focus();
+        }
+    });
+</script>
+
+</body>
+</html>
